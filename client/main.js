@@ -1,9 +1,6 @@
 
 var socket = io.connect("http://24.16.255.56:8888");
 
-socket.on("load", function (data) {
-    console.log(data);
-});
 
 socket.emit("save", { studentname: "Dirk Sexton", statename: "particle state", data: "Goodbye World" });
 socket.emit("load", { studentname: "Dirk Sexton", statename: "particle state" });

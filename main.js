@@ -1,5 +1,4 @@
 
-// GameBoard code below
 
 function distance(a, b) {
     var dx = a.x - b.x;
@@ -65,12 +64,64 @@ Circle.prototype.collideTop = function () {
 Circle.prototype.collideBottom = function () {
     return (this.y + this.radius) > 800;
 };
-
+	var socket = io.connect("http://24.16.255.56:8888");
+	var saveboolean = false;
+	var loadboolean = false;	
+	var savedata = [];
+	var loaddata = [];
+	
 Circle.prototype.update = function () {
+	
+
     Entity.prototype.update.call(this);
 
     this.x += this.velocity.x * this.game.clockTick;
     this.y += this.velocity.y * this.game.clockTick;
+	if(this.game.click){
+		if (this.game.click.x > 300 && this.game.click.x < 350 && this.game.click.y > 730 && this.game.click.y < 750){
+			saveboolean = true;
+			
+		}
+		if (this.game.click.x > 400 && this.game.click.x < 450 && this.game.click.y > 730 && this.game.click.y < 750){
+			loadboolean = true;
+		}
+	}
+	if(saveboolean) {
+		for (var i = 1; i < this.game.entities.length; i++) {
+			var ent = this.game.entities[i];
+			savedata.push(ent.x, ent.y, ent.velocity, ent.radius, ent.velocity.x, ent.velocity.y, this.x, this.y);
+		}
+		socket.emit("save", { studentname: "Dirk Sexton", statename: "particle state", savedata});
+		saveboolean = false;
+	}
+	if(loadboolean){
+		if(loaddata.length == 0){
+			socket.emit("load", { studentname: "Dirk Sexton", statename: "particle state"});
+		} else {
+			var index = 0
+			for (var i = 1; i < this.game.entities.length; i++) {
+				var ent = this.game.entities[i];
+				ent.x = loaddata[index];
+				index ++;
+				ent.y = loaddata[index];
+				index ++;
+				ent.velocity = loaddata[index];
+				index ++;				
+				ent.radius = loaddata[index];
+				index ++;
+				ent.velocity.x = loaddata[index];
+				index ++;	
+				ent.velocity.y = loaddata[index];
+				index ++;					
+				this.x = loaddata[index];
+				index ++;
+				this.y = loaddata[index];
+				index ++;					
+			}
+			loaddata = [];
+			loadboolean = false;
+		}
+}
 
     if (this.collideLeft() || this.collideRight()) {
         this.velocity.x = -this.velocity.x * friction;
@@ -156,9 +207,9 @@ Circle.prototype.update = function () {
      
 		this.color = 0;
     }
-	if(this.game.click) {
-		this.x = this.game.mouse.x;
-		this.y = this.game.mouse.y;
+	if(this.game.click ) {
+		//this.x = this.game.mouse.x;
+		//this.y = this.game.mouse.y;
 
 	}
 
@@ -167,6 +218,14 @@ Circle.prototype.update = function () {
 };
 
 Circle.prototype.draw = function (ctx) {
+	ctx.fillStyle = "red";
+	
+	ctx.font = "30px Sans-serif";
+	ctx.fillText("save", 300, 750);
+		
+	
+	ctx.font = "30px Sans-serif";
+	ctx.fillText("load", 400, 750);
     ctx.beginPath();
     ctx.fillStyle = this.colors[this.color];
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
@@ -174,7 +233,7 @@ Circle.prototype.draw = function (ctx) {
     ctx.closePath();
 
 
-	if(this.game.mouse) {
+	if(this.game.mouse ) {
 		//ctx.save;
 		//this.x = this.game.mouse.x;
 		//this.y = this.game.mouse.y;
@@ -189,12 +248,30 @@ Circle.prototype.draw = function (ctx) {
 
 };
 
+window.onload = function () {
+
+
+	socket.on("load", function (data) {
+		console.log("load");
+		console.log(data);
+		loaddata = data.savedata;
+	});
+
+	socket.on("save", function (data) {
+		console.log("save");
+		console.log(data);
+	});
+
+
+
+};
 
 
 // the "main" code begins here
 var friction = 1;
 var acceleration = 1000000;
 var maxSpeed = 100;
+
 
 var ASSET_MANAGER = new AssetManager();
 
@@ -207,6 +284,9 @@ ASSET_MANAGER.downloadAll(function () {
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
 
+
+
+
     var gameEngine = new GameEngine();
     var circle = new Circle(gameEngine);
     circle.pusher();
@@ -216,7 +296,7 @@ ASSET_MANAGER.downloadAll(function () {
     circle.gray();
 	
     gameEngine.addEntity(circle);
-    for (var i = 0; i < 500; i++) {
+    for (var i = 0; i < 5; i++) {
         circle = new Circle(gameEngine);
         gameEngine.addEntity(circle);
     }
