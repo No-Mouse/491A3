@@ -207,9 +207,9 @@ Circle.prototype.update = function () {
      
 		this.color = 0;
     }
-	if(this.game.click ) {
-		//this.x = this.game.mouse.x;
-		//this.y = this.game.mouse.y;
+	if(this.game.click && this.game.mouse.y < 700) {
+		this.x = this.game.mouse.x;
+		this.y = this.game.mouse.y;
 
 	}
 
@@ -285,8 +285,6 @@ ASSET_MANAGER.downloadAll(function () {
     var ctx = canvas.getContext('2d');
 
 
-
-
     var gameEngine = new GameEngine();
     var circle = new Circle(gameEngine);
     circle.pusher();
@@ -296,7 +294,7 @@ ASSET_MANAGER.downloadAll(function () {
     circle.gray();
 	
     gameEngine.addEntity(circle);
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 10; i++) {
         circle = new Circle(gameEngine);
         gameEngine.addEntity(circle);
     }
